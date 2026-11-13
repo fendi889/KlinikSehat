@@ -25,6 +25,8 @@ RUN composer install --no-dev --optimize-autoloader
 # Atur permission
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+RUN php artisan optimize:clear
+
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan optimize:clear && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
