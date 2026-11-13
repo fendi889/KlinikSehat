@@ -5,6 +5,11 @@ namespace App\Services;
 use App\Models\Poli;
 use App\Models\Queue;
 use App\Models\Visit;
+use App\Models\Patient;
+use App\Models\Doctor;
+use App\Models\Schedule;
+use App\Models\Setting;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class QueueService

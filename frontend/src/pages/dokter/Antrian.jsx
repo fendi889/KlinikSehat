@@ -12,7 +12,21 @@ export default function Antrian() {
   const load = useCallback(() => api('/dokter/queue').then(setList).catch((e) => setErr(e.message)), [])
   useEffect(() => { load(); const t = setInterval(load, 5000); return () => clearInterval(t) }, [load])
 
-  const panggil = async (q) => { setErr(''); setOk(''); try { const r = await api(`/dokter/queue/${q.id}/call`, { method: 'POST' }); setOk(r.message); load() } catch (e) { setErr(e.message) } }
+  const playAnnouncement = (kode, pasien, poli) => {
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const text = `Nomor antrean ${kode}, atas nama ${pasien}, silakan menuju ke ${poli || 'ruang pemeriksaan'}.`;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID';
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.error('Speech synthesis error:', e);
+      }
+    }
+  };
+
+  const panggil = async (q) => { setErr(''); setOk(''); try { const r = await api(`/dokter/queue/${q.id}/call`, { method: 'POST' }); setOk(r.message); playAnnouncement(q.kode, q.pasien, q.poli_nama); load() } catch (e) { setErr(e.message) } }
   const mulai = async (q) => { setErr(''); try { await api(`/dokter/visits/${q.visit_id}/start`, { method: 'POST' }); nav(`/dokter/pemeriksaan/${q.visit_id}`) } catch (e) { setErr(e.message) } }
 
   return (

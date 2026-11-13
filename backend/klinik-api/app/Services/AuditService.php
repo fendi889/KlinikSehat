@@ -10,7 +10,7 @@ class AuditService
     {
         AuditLog::create([
             'user_id' => $userId ?? auth()->id(), 'aksi' => $aksi, 'target' => $target,
-            'detail' => $detail ?: null, 'ip' => request()->ip(),
+            'detail' => $detail ? json_encode($detail) : null, 'ip' => request()->ip(),
         ]);
     }
 }

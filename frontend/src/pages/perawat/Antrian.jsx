@@ -13,7 +13,21 @@ export default function Antrian({ role = 'perawat' }) {
   const load = useCallback(() => api(`${base}/queue${poli ? `?poli_id=${poli}` : ''}`).then(setD).catch((e) => setErr(e.message)), [poli])
   useEffect(() => { load(); const t = setInterval(load, 5000); return () => clearInterval(t) }, [load])
 
-  const aksi = async (path, pesan) => { setErr(''); setOk(''); try { const r = await api(path, { method: 'POST' }); setOk(r.message || pesan); load() } catch (e) { setErr(e.message) } }
+  const playAnnouncement = (kode, pasien, poli) => {
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const text = `Nomor antrean ${kode}, atas nama ${pasien}, silakan menuju ke ${poli || 'ruang pemeriksaan'}.`;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID';
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.error('Speech synthesis error:', e);
+      }
+    }
+  };
+
+  const aksi = async (path, pesan, q) => { setErr(''); setOk(''); try { const r = await api(path, { method: 'POST' }); setOk(r.message || pesan); if (q) playAnnouncement(q.kode, q.pasien, q.poli_nama); load() } catch (e) { setErr(e.message) } }
   const polis = d ? [...new Map(d.antrian.map((a) => [a.poli_id, a.poli_nama]))] : []
   const R = d?.ringkasan || {}
 
@@ -39,7 +53,7 @@ export default function Antrian({ role = 'perawat' }) {
             {q.alergi && <p className="mt-2 rounded-lg bg-yellow-50 p-2 text-sm text-yellow-800">Alergi: {q.alergi}</p>}
             {!['selesai', 'batal'].includes(q.visit_status) && (
               <div className="mt-3 flex flex-wrap gap-2">
-                {['menunggu', 'terlewat', 'dipanggil'].includes(q.status) && <button className="btn btn-outline min-h-[40px]" onClick={() => aksi(`${base}/queue/${q.id}/call`)}>{q.status === 'dipanggil' ? 'Panggil lagi' : 'Panggil'}</button>}
+                {['menunggu', 'terlewat', 'dipanggil'].includes(q.status) && <button className="btn btn-outline min-h-[40px]" onClick={() => aksi(`${base}/queue/${q.id}/call`, null, q)}>{q.status === 'dipanggil' ? 'Panggil lagi' : 'Panggil'}</button>}
                 {role === 'perawat' && q.visit_status === 'terdaftar' && <button className="btn btn-outline min-h-[40px]" onClick={() => aksi(`/perawat/visits/${q.visit_id}/verify`)}>Verifikasi</button>}
                 {['menunggu', 'dipanggil'].includes(q.status) && <button className="btn btn-outline min-h-[40px]" onClick={() => aksi(`${base}/queue/${q.id}/skip`)}>Lewati</button>}
                 {q.status === 'terlewat' && <button className="btn btn-outline min-h-[40px]" onClick={() => aksi(`${base}/queue/${q.id}/requeue`)}>Masukkan kembali</button>}
