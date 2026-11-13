@@ -17,6 +17,8 @@ WORKDIR /var/www/html
 
 COPY . .
 
+RUN rm -rf bootstrap/cache/*.php
+
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Install dependencies Laravel
@@ -24,8 +26,6 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Atur permission
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-RUN php artisan optimize:clear
 
 EXPOSE 8000
 
