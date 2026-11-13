@@ -16,7 +16,7 @@ use App\Http\Controllers\Dokter\DokterController as DK;
 use App\Http\Controllers\Pasien\PasienController as PS;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function () {
+Route::group([], function () {
     // Publik
     Route::prefix('public')->controller(PublicController::class)->group(function () {
         Route::get('stats', 'stats'); Route::get('doctors', 'doctors'); Route::get('services', 'services');
