@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.4-cli
 
 # Install dependencies sistem & PostgreSQL
 RUN apt-get update && apt-get install -y \
@@ -16,6 +16,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY . .
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Install dependencies Laravel
 RUN composer install --no-dev --optimize-autoloader
